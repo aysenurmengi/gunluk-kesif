@@ -1,0 +1,1 @@
+"""Dış kaynakları okuyan modüller."""

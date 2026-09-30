@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f1117">
+  <title>Günlük Keşif — Merakına yer aç</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/fonts/archivo.css">
+  <link rel="stylesheet" href="css/styles.css?v=accounts-1">
+  <script type="module" src="js/app.js?v=accounts-1"></script>
+</head>
+<body>
+  <a class="skip" href="#selection">İçeriklere geç</a>
+  <div id="scroll-progress" class="scroll-progress" aria-hidden="true"></div>
+  <header class="header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/" aria-label="Günlük Keşif ana sayfa"><span class="brand-mark" aria-hidden="true"></span>günlük keşif</a>
+      <nav class="nav-track" aria-label="Ana gezinme">
+        <span class="nav-indicator" aria-hidden="true"></span>
+        <button id="discover" class="nav-button active" aria-pressed="true">Keşfet</button>
+        <button id="saved" class="nav-button" aria-pressed="false">Kaydettiklerim <span id="saved-count" hidden>0</span></button>
+      </nav>
+      <div class="header-side">
+        <span class="edition" id="edition-label">Türkçe seçki</span>
+        <span id="account-email" class="account-email" hidden></span>
+        <button id="account" class="account-button" type="button">Giriş yap</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="hero wrap discover-only" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow-pill" data-reveal><span class="live-dot"></span>Her gün, küçük bir keşif</p>
+        <h1 id="hero-title"><span class="word-mask"><span style="--delay:0ms">Bugüne</span></span> <span class="word-mask"><span style="--delay:80ms">yetiş.</span></span><br><span class="headline-accent"><span class="word-mask"><span style="--delay:180ms">Merakına</span></span> <span class="word-mask"><span style="--delay:260ms">zaman</span></span> <span class="word-mask"><span style="--delay:340ms">ayır.</span></span></span></h1>
+        <p class="intro" data-reveal>Dünyada ne oluyor, bilmeye değer ne var? Sevdiğin konularda günlük yazı ve videolarla ufkunu genişlet; Türkiye ve dünyadan gelişmeleri takip et.</p>
+        <div class="hero-actions" data-reveal>
+          <a class="button primary" href="#selection">Seçkime başla <span data-icon="arrow-down"></span></a>
+          <a class="button ghost" href="#interests">Konuları seç</a>
+        </div>
+      </div>
+      <aside class="today-card" aria-label="Günün keşifleri" data-reveal>
+        <div class="today-top"><div><p id="hero-day-name" class="muted"></p><p id="hero-month" class="hero-month"></p></div><span id="hero-count" class="count-pill">— keşif</span></div>
+        <div class="day-number-wrap"><span id="hero-day" class="day-number" data-parallax="-0.12"></span></div>
+        <div class="steps">
+          <div class="step"><span class="step-number">01</span><div><h2>İyi bir yazıya rastla</h2><p>Makaleler, bloglar ve merakını besleyen fikirler.</p></div></div>
+          <div class="step"><span class="step-number">02</span><div><h2>Biraz derinleş</h2><p>Eski bir video, iyi bir yazı, yepyeni bir fikir.</p></div></div>
+        </div>
+        <p class="note-foot">Yeni yayımlanmış olması şart değil. Senin için yeni olması yeterli.</p>
+      </aside>
+    </section>
+    <section id="interests" class="interests wrap discover-only" aria-labelledby="interest-title">
+      <div class="section-label" data-reveal><h2 id="interest-title">Neler ilgini çekiyor?</h2><span>Birden fazla konu seçebilirsin · <span id="topic-count"></span></span></div>
+      <div id="topics" class="topics" role="group" aria-label="İlgi alanları"></div>
+    </section>
+    <section id="selection" class="selection wrap" aria-labelledby="selection-title">
+      <div class="selection-top">
+        <div><p class="eyebrow" id="list-kicker">Merakının peşinden</p><h2 id="selection-title" tabindex="-1">Bugünün keşifleri</h2></div>
+        <div class="list-controls">
+          <div class="filters" role="group" aria-label="İçerik türü"><span class="filter-indicator" aria-hidden="true"></span><button data-format="Tümü" class="selected" aria-pressed="true">Tümü</button><button data-format="Yazı" aria-pressed="false">Yazı</button><button data-format="Video" aria-pressed="false">Video</button></div>
+          <button id="reload" class="button reload discover-only"><span data-icon="refresh"></span>Yenile</button>
+        </div>
+      </div>
+      <div class="calendar-row discover-only">
+        <div id="calendar" class="calendar" role="group" aria-label="Son yedi günün keşif takvimi"></div>
+        <details class="archive-picker"><summary>Geçmiş seçkiler</summary><label for="edition-date">Öneri tarihi</label><select id="edition-date"><option value="">Bugün</option></select></details>
+      </div>
+      <p id="result-count" class="result-count" aria-live="polite"></p>
+      <p id="data-status" class="data-status" role="status">Günlük seçki yükleniyor…</p>
+      <p id="topic-notice" class="data-notice" hidden></p>
+      <p id="coverage-notice" class="data-notice" hidden></p>
+      <p id="storage-notice" class="data-notice" role="status" hidden></p>
+      <p id="account-notice" class="data-notice" role="status" hidden></p>
+      <details id="selection-notes" class="selection-notes" hidden><summary id="selection-notes-label">Seçki notları</summary><p id="source-warning" class="data-notice"></p></details>
+      <div id="empty" class="empty" hidden><h3></h3><p></p></div>
+    </section>
+    <section id="reel" class="reel" aria-label="Önerilen içerikler" hidden>
+      <div id="reel-inner" class="reel-inner">
+        <div id="reel-tools" class="reel-tools wrap"><span>Kaydırarak keşfet</span><div class="reel-rail"><span id="reel-fill"></span></div><span id="reel-count">01 / 01</span><button class="reel-arrow" id="previous-card" aria-label="Önceki içerik"><span data-icon="arrow-left"></span></button><button class="reel-arrow" id="next-card" aria-label="Sonraki içerik"><span data-icon="arrow-right"></span></button></div>
+        <div id="reel-viewport" class="reel-viewport"><div id="cards" class="cards" aria-busy="true"></div></div>
+      </div>
+    </section>
+    <section class="closing wrap"><div class="closing-banner" data-reveal><h2 data-parallax="0.04">Yarın,<br>yeni bir keşif.</h2><div><p>Az içerik, yeni bakış açıları. Seçtiğin konularda her gün yeni bir seçki hazırlanır.</p><button id="go-saved" class="button dark">Kaydettiklerime git <span data-icon="arrow-up-right"></span></button></div></div></section>
+  </main>
+  <footer class="wrap footer"><span>günlük keşif</span><span>Kaydettiklerin hesabında, konu seçimlerin bu tarayıcıda saklanır.</span></footer>
+  <dialog id="auth-dialog" class="auth-dialog" aria-labelledby="auth-title">
+    <form id="auth-form" class="auth-form" novalidate>
+      <button id="auth-close" class="auth-close" type="button" aria-label="Kapat"><span data-icon="close"></span></button>
+      <p id="auth-reason" class="auth-reason">Kaydettiklerin hesabında saklanır.</p>
+      <h2 id="auth-title">Giriş yap</h2>
+      <div class="auth-tabs" role="group" aria-label="Hesap işlemi">
+        <button type="button" data-auth-mode="login" aria-pressed="true">Giriş yap</button>
+        <button type="button" data-auth-mode="register" aria-pressed="false">Hesap oluştur</button>
+      </div>
+      <label class="auth-field">E-posta<input id="auth-email" name="email" type="email" autocomplete="email" maxlength="254" required></label>
+      <label class="auth-field">Parola<input id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="256" required aria-describedby="auth-hint"></label>
+      <p id="auth-hint" class="auth-hint" hidden>En az 8 karakter. Yaygın parolalar ve e-postanın bir parçası kabul edilmez.</p>
+      <label id="auth-confirm-field" class="auth-field" hidden>Parolayı tekrar yaz<input id="auth-password-confirm" name="password-confirm" type="password" autocomplete="new-password" maxlength="256"></label>
+      <label class="auth-show"><input id="auth-show" type="checkbox"> Parolayı göster</label>
+      <p id="auth-error" class="auth-error" role="alert" hidden></p>
+      <button id="auth-submit" class="button primary auth-submit" type="submit">Giriş yap</button>
+    </form>
+  </dialog>
+</body>
+</html>

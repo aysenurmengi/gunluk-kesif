@@ -1,0 +1,5 @@
+fastapi==0.142.0
+pydantic==2.13.5
+uvicorn==0.54.0
+# PostgreSQL için; DATABASE_URL yoksa SQLite kullanılır ve bu sürücü içe aktarılmaz.
+psycopg[binary]==3.3.6

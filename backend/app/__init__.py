@@ -1,0 +1,1 @@
+"""Kaynak toplama uygulaması."""

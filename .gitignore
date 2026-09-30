@@ -1,0 +1,47 @@
+# --- Gizli bilgiler: veritabanı parolası vb. Asla gite girmemeli. ---
+.env
+.env.*
+!.env.example
+
+# --- Yerel veriler: veritabanı, yedekler, kullanıcı hesapları ---
+/data/
+*.sqlite
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+
+# --- Yerel belgeler ve çalışma çıktıları ---
+/docs/
+/artifacts/
+
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+
+# --- Günlükler ve geçici dosyalar ---
+*.log
+*.tmp
+*.bak
+
+# --- Editör ve işletim sistemi ---
+.vscode/
+.idea/
+.claude/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

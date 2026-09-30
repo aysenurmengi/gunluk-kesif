@@ -1,0 +1,1 @@
+"""Günlük Keşif Python paketi."""
