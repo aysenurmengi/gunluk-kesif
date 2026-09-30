@@ -773,16 +773,6 @@ summary {
 .card h3 a:hover {
   color:var(--accent);
 }
-.recommendation-reason {
-  font-size:14px;
-  line-height:1.55;
-  color:var(--muted);
-  text-wrap:pretty;
-}
-.recommendation-reason strong {
-  font-weight:600;
-  color:oklch(.9 .005 265);
-}
 .card-footer {
   margin-top:auto;
   padding-top:12px;

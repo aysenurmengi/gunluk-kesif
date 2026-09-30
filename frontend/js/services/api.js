@@ -34,7 +34,6 @@ export function toCardItem(item) {
       : ROLE_LABELS[item.role]
         ?? (item.content_type === "news" ? "Yeni gelişme" : item.purpose === "evergreen" ? "Biraz derinleş" : "Gündemi yakala"),
     sourceName: item.source_name,
-    recommendationReason: item.recommendation_reason || "",
     publishedAt: validDate ? date.toISOString() : null,
     dateLabel: validDate
       ? (item.publication_date_only

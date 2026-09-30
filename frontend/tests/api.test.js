@@ -77,10 +77,9 @@ test("archive selection requests the stored date", async (t) => {
   await fetchContents("2026-09-29");
 });
 
-test("old AI archive entries map to Technology without losing their reason", () => {
+test("old AI archive entries map to Technology", () => {
   const card = toCardItem({ ...item, topic: "yapay-zeka", recommendation_reason: "Bir kavramı açıklıyor." });
   assert.equal(card.topic.id, "teknoloji");
-  assert.equal(card.recommendationReason, "Bir kavramı açıklıyor.");
 });
 
 test("date-only sources do not display a fabricated publication time", () => {

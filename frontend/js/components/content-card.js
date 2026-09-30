@@ -8,7 +8,6 @@ export function createContentCard(item, { isSaved, onToggleSave, index = 0 }) {
   card.innerHTML = `
     <div class="art"><div class="art-top"><span class="card-number" aria-hidden="true"></span><span class="format-badge">${icon(item.format === "Video" ? "play" : "text", 12)}<span></span></span></div><span class="art-topic"></span></div>
     <div class="card-body"><span class="purpose"></span><h3><a target="_blank" rel="noopener noreferrer"></a></h3>
-      <p class="recommendation-reason"><strong>Neden önerildi?</strong> <span></span></p>
       <div class="card-footer"><div class="source-meta"><p class="source-line"></p><p class="published-line"><time></time></p></div><div class="card-actions"><button class="save">${icon("bookmark", 17)}</button><a class="preview" target="_blank" rel="noopener noreferrer"><span></span>${icon("arrow-up-right", 14)}</a></div></div>
     </div>`;
   card.querySelector(".card-number").textContent = String(index + 1).padStart(2, "0");
@@ -18,8 +17,6 @@ export function createContentCard(item, { isSaved, onToggleSave, index = 0 }) {
   const title = card.querySelector("h3 a");
   title.textContent = item.title;
   title.href = item.url;
-  card.querySelector(".recommendation-reason span").textContent = item.recommendationReason;
-  card.querySelector(".recommendation-reason").hidden = !item.recommendationReason;
   card.querySelector(".source-line").textContent = item.sourceName;
   const time = card.querySelector("time");
   time.textContent = item.dateLabel;
