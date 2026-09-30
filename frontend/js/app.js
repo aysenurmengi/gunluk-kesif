@@ -1,4 +1,4 @@
-import { topics } from "./data/topics.js?v=accounts-1";
+import { activeTopics as topics } from "./data/topics.js?v=accounts-1";
 import { createContentCard } from "./components/content-card.js?v=accounts-1";
 import { icon } from "./components/icons.js?v=accounts-1";
 import { createMotion } from "./components/motion.js?v=accounts-1";

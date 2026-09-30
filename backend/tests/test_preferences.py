@@ -113,7 +113,7 @@ class PolicyUpgradeTests(unittest.TestCase):
 class CatalogExpansionTests(unittest.TestCase):
     def test_each_new_topic_has_two_different_publishers(self):
         selected = select_items([serialize(i) for i in curated_items()], DAY)
-        for topic in ("yemek", "moda", "kitap", "spor"):
+        for topic in ("yemek", "kitap", "spor"):
             with self.subTest(topic=topic):
                 items = [i for i in selected if i["topic"] == topic]
                 self.assertEqual(len(items), 2)
@@ -135,7 +135,7 @@ class CatalogExpansionTests(unittest.TestCase):
                 self.assertIn(kept, updated["items"])
                 self.assertEqual(updated["catalog_revision"], CATALOG_REVISION)
                 self.assertEqual(updated["errors"], {})
-                self.assertTrue({"yemek", "moda", "kitap", "spor"}.issubset({i["topic"] for i in updated["items"]}))
+                self.assertTrue({"yemek", "kitap", "spor"}.issubset({i["topic"] for i in updated["items"]}))
                 self.assertEqual(get_daily(DAY, path), updated)
                 self.assertEqual(get_daily(date(2026, 9, 29), path), yesterday)
                 self.assertEqual(collect.call_count, 1)

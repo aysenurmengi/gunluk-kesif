@@ -6,7 +6,7 @@ import threading
 from ..config import running_on_vercel
 from ..models import ContentItem
 from ..repositories import daily as repository, database
-from ..sources.daily_catalog import FEED_SOURCES, CURATED_SOURCES, SUPPORTED_TOPICS, CATALOG_REVISION, curated_items
+from ..sources.daily_catalog import FEED_SOURCES, CURATED_SOURCES, SOURCE_PROFILES, SUPPORTED_TOPICS, CATALOG_REVISION, curated_items
 from .collection import collect_contents
 from .content import canonical_url
 from .recommendation_policy import POLICY_VERSION, TURKEY_TIME, expired, prepare_candidate, select_items, topic_shortfalls
@@ -37,7 +37,7 @@ def reevaluate(payload):
                            | {"published_at": published})
     except (TypeError, ValueError):
         return None
-    prepared = prepare_candidate(item)
+    prepared = prepare_candidate(item, SOURCE_PROFILES.get(item.source_id))
     return serialize(prepared) if prepared else None
 
 def freshness(existing, day):
@@ -99,7 +99,8 @@ def refresh_in_background(day, target):
 
 def build_edition(day, target):
     result = collect_contents(list(FEED_SOURCES))
-    accepted = [candidate for item in result.items if (candidate := prepare_candidate(item)) is not None]
+    accepted = [candidate for item in result.items
+                if (candidate := prepare_candidate(item, SOURCE_PROFILES.get(item.source_id))) is not None]
     # Referansın editoryal bilgileri aynı URL'nin ham RSS kaydı tarafından ezilmesin.
     items = accepted + curated_items()
     with repository.connect(target) as db:
@@ -112,14 +113,17 @@ def build_edition(day, target):
         candidates, dead = [], []
         for payload in repository.unused_candidates(db):
             current = reevaluate(payload)
-            if current is None or expired(current, day) or canonical_url(current["url"]) in seen:
+            # Kaldırılan konudaki (örn. moda) eski adaylar da bir daha önerilmez.
+            if (current is None or current["topic"] not in SUPPORTED_TOPICS or expired(current, day)
+                    or canonical_url(current["url"]) in seen):
                 dead.append(payload["url"])
             else:
                 candidates.append(current)
         # Bir daha önerilemeyecek adaylar havuzu büyütmesin.
         repository.delete_candidates(db, dead)
         # Katalog büyürken bugünün geçerli kartlarını tut, boş yerleri tamamla.
-        retained = existing["items"] if existing and existing.get("policy_version", 0) >= 2 else []
+        retained = [item for item in (existing["items"] if existing and existing.get("policy_version", 0) >= 2 else [])
+                    if item["topic"] in SUPPORTED_TOPICS]
         # Yeni katalogdaki konu düzeltmelerini yalnızca bugünün kartlarına uygula.
         reviewed = {canonical_url(item.url): serialize(item) for item in curated_items()}
         retained = [reviewed.get(canonical_url(item["url"]), item) for item in retained]

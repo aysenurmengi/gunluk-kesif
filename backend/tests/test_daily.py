@@ -91,13 +91,15 @@ class DailyTests(unittest.TestCase):
             self.assertEqual(client.get("/api/recommendations?day=oops").status_code, 422)
 
 class SelectionTests(unittest.TestCase):
-    def test_multiple_recent_news_and_no_news_in_economy(self):
+    def test_recent_news_and_topic_news_as_development(self):
         candidates = [item(1, "guncel", "news", datetime(2026, 9, 29, tzinfo=timezone.utc)),
                       item(2, "guncel", "news", datetime(2026, 9, 30, tzinfo=timezone.utc)),
                       item(3, "guncel", "news", datetime(2026, 9, 20, tzinfo=timezone.utc)),
-                      item(4, "ekonomi", "news", datetime(2026, 9, 30, tzinfo=timezone.utc))]
+                      # Konusu belli haber akışı (TRT Ekonomi) o konunun "gelişme" adayıdır.
+                      item(4, "ekonomi", "news", datetime(2026, 9, 30, tzinfo=timezone.utc)),
+                      item(5, "ekonomi", "news", datetime(2026, 9, 25, tzinfo=timezone.utc))]
         selected = select_items([serialize(i) for i in candidates], DAY)
-        self.assertEqual({i["url"] for i in selected}, {candidates[0].url, candidates[1].url})
+        self.assertEqual({i["url"] for i in selected}, {candidates[0].url, candidates[1].url, candidates[3].url})
 
     def test_video_diversity_and_old_learning_material(self):
         candidates = [item(1), item(2), item(3, kind="video", published=datetime(2015, 1, 1, tzinfo=timezone.utc))]

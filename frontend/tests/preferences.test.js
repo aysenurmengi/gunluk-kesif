@@ -64,9 +64,16 @@ test("all old topics opt into Finance; a custom subset stays unchanged", () => {
   const old = ["guncel", "teknoloji", "ekonomi", "yemek", "moda", "kitap", "spor"];
   const restored = readPreferences(makeStorage({ "gk-v2-topics": JSON.stringify(old) }));
   assert.equal(restored.selectedTopics.has("finans"), true);
+  assert.equal(restored.selectedTopics.has("bilim"), true);
+  assert.equal(restored.selectedTopics.has("moda"), false);
   const custom = readPreferences(makeStorage({ "gk-v2-topics": '["ekonomi"]' }));
   assert.deepEqual([...custom.selectedTopics], ["ekonomi"]);
 });
 test("Finance is a valid independent card topic", () => {
   assert.equal(toCardItem({ ...original, topic: "finans" }).topic.name, "Finans");
+});
+
+test("retired Moda topic still renders old archive and saved cards", () => {
+  assert.equal(toCardItem({ ...original, topic: "moda" }).topic.name, "Moda ve giyim");
+  assert.equal(toCardItem({ ...original, topic: "bilim" }).topic.name, "Bilim");
 });

@@ -133,3 +133,14 @@ test("news cards distinguish Turkey, world and sports without changing format", 
   assert.equal(toCardItem({ ...news, topic: "spor" }).purpose, "Spor gündemi");
   assert.equal(toCardItem(news).format, "Yazı");
 });
+
+test("topic cards show their role; news keeps its scope label", () => {
+  assert.equal(toCardItem({ ...item, role: "gelisme" }).purpose, "Yeni gelişme");
+  assert.equal(toCardItem({ ...item, role: "video", content_type: "video" }).purpose, "İzlemeye değer");
+  assert.equal(toCardItem({ ...item, role: "derinlik" }).purpose, "Biraz derinleş");
+  assert.equal(toCardItem({ ...item, topic: "guncel", content_type: "news", news_scope: "dunya", role: "gelisme" }).purpose, "Dünya gündemi");
+  // Rol alanı olmayan eski kayıtlar.
+  assert.equal(toCardItem({ ...item, purpose: "evergreen" }).purpose, "Biraz derinleş");
+  assert.equal(toCardItem({ ...item, topic: "ekonomi", content_type: "news" }).purpose, "Yeni gelişme");
+  assert.equal(toCardItem({ ...item, topic: "spor", content_type: "news", role: "gelisme" }).purpose, "Spor gündemi");
+});

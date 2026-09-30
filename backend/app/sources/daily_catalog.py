@@ -1,9 +1,14 @@
 """Yayıncılar aday sağlar; konu ataması içerik düzeyinde yapılır."""
 from datetime import datetime
-from ..models import Source, ContentItem
+from ..models import ContentItem, Source, SourceProfile
 from .curated_library import LIBRARY_ITEMS
 
-CATALOG_REVISION = 3
+CATALOG_REVISION = 5
+
+
+def _youtube(channel_id):
+    return f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+
 
 FEED_SOURCES = (
     Source("evrimagaci", "Evrim Ağacı", "https://evrimagaci.org/rss.xml", ""),
@@ -14,13 +19,41 @@ FEED_SOURCES = (
     Source("bbc-turkce", "BBC Türkçe", "https://feeds.bbci.co.uk/turkce/rss.xml", "guncel", "news"),
     Source("trt-spor", "TRT Haber / Spor", "https://www.trthaber.com/spor_articles.rss", "spor", "news"),
     Source("matematiksel", "Matematiksel", "https://www.matematiksel.org/feed/", ""),
-    # Elle seçilmiş liste tükenmesin diye yemek, moda, kitap ve ekonomi akışları.
+    # Elle seçilmiş liste tükenmesin diye yemek, kitap ve ekonomi akışları.
     # Konu yine içerik düzeyinde atanır; akıştaki her yazı önerilmez.
     Source("lezzet", "Lezzet", "https://www.lezzet.com.tr/rss", ""),
-    Source("elle-tr", "ELLE Türkiye", "https://www.elle.com.tr/rss", ""),
     Source("kitaphaber", "Kitap Haber", "https://www.kitaphaber.com.tr/rss", ""),
     Source("mahfi-egilmez", "Mahfi Eğilmez", "https://www.mahfiegilmez.com/feeds/posts/default?alt=rss", ""),
+    # Her konuda gelişme / video / derinlik karışımı için video ve haber akışları.
+    Source("trt-ekonomi", "TRT Haber / Ekonomi", "https://www.trthaber.com/ekonomi_articles.rss", "ekonomi", "news"),
+    Source("webrazzi", "Webrazzi", "https://webrazzi.com/feed/", ""),
+    Source("youtube:UCv6jcPwFujuTIwFQ11jt1Yw", "Barış Özcan", _youtube("UCv6jcPwFujuTIwFQ11jt1Yw"), "", "video"),
+    Source("youtube:UCatnasFAiXUvWwH8NlSdd3A", "Evrim Ağacı (YouTube)", _youtube("UCatnasFAiXUvWwH8NlSdd3A"), "", "video"),
+    Source("youtube:UCWA2nh0yrIMC6uG0hfbucRQ", "Yemek.com (YouTube)", _youtube("UCWA2nh0yrIMC6uG0hfbucRQ"), "", "video"),
+    Source("youtube:UCvgwLFmnppZoPVBQJwPaNsA", "Socrates Dergi", _youtube("UCvgwLFmnppZoPVBQJwPaNsA"), "", "video"),
+    Source("youtube:UCebdo7-2NdjcktKzco64iNw", "TRT Spor (YouTube)", _youtube("UCebdo7-2NdjcktKzco64iNw"), "", "video"),
 )
+# 30.09.2026'da 240 aday elle etiketlenerek belirlendi (tier: 3 çoğu iyi, 2 karışık,
+# 1 çoğu elenir). DW Türkçe (0/15) ve ShiftDelete (0/16) bu yüzden eklenmedi.
+# Güncel haber akışlarının profili yoktur; onlar ayrı kurallarla seçilir.
+SOURCE_PROFILES = {
+    "evrimagaci": SourceProfile(("bilim",), 3),
+    "youtube:UCatnasFAiXUvWwH8NlSdd3A": SourceProfile(("bilim",), 3),
+    "youtube:UCv6jcPwFujuTIwFQ11jt1Yw": SourceProfile(("teknoloji", "bilim"), 3),
+    "matematiksel": SourceProfile(("bilim",), 3),
+    # Yatırım turu duyuruları NEGATIVE_TERMS ile elendiği için kalanı orta seviyede.
+    "webrazzi": SourceProfile(("teknoloji",), 2),
+    "mahfi-egilmez": SourceProfile(("ekonomi", "finans"), 3),
+    "youtube:UCW4Y4bPuafXwVEs0oly5vdw": SourceProfile(("finans", "ekonomi"), 3),
+    "trt-ekonomi": SourceProfile(("ekonomi",), 2),
+    "edebiyat-inceleme": SourceProfile(("kitap",), 2),
+    "kitaphaber": SourceProfile(("kitap",), 2),
+    "lezzet": SourceProfile(("yemek",), 1),
+    "youtube:UCWA2nh0yrIMC6uG0hfbucRQ": SourceProfile(("yemek",), 2),
+    "youtube:UCvgwLFmnppZoPVBQJwPaNsA": SourceProfile(("spor",), 3),
+    "youtube:UCebdo7-2NdjcktKzco64iNw": SourceProfile(("spor",), 1),
+    "trt-spor": SourceProfile(("spor",), 2),
+}
 CURATED_SOURCES = (
     Source("youtube:UCDTSUkdlbcgEU-IGH_mHgmw", "Bebar Bilim", "https://www.youtube.com/@bebarbilim", "", "video"),
 )
@@ -30,7 +63,7 @@ CURATED_SOURCES += tuple(
     Source(row["source_id"], row["source_name"], row["url"], "", row["content_type"])
     for row in LIBRARY_ITEMS if row["source_id"] not in _known_sources
 )
-SUPPORTED_TOPICS = ("teknoloji", "ekonomi", "finans", "kitap", "guncel", "yemek", "moda", "spor")
+SUPPORTED_TOPICS = ("teknoloji", "bilim", "ekonomi", "finans", "kitap", "guncel", "yemek", "spor")
 
 # Kullanıcının örnekleri tercih referansıdır. Buradaki kısa açıklamalar
 # editoryal nottur; video transkripti veya otomatik üretilmiş özet değildir.
@@ -63,4 +96,7 @@ def curated_items():
         **row,
         "published_at": datetime.fromisoformat(row["published_at"]) if row["published_at"] else None,
         "editorial_reviewed": True,
+        # Elle incelenmiş içerik: rolü türünden gelir, kalitesi yüksek kabul edilir.
+        "role": "video" if row["content_type"] == "video" else "derinlik",
+        "quality": 8,
     }) for row in (*REFERENCE_ITEMS, *LIBRARY_ITEMS)]

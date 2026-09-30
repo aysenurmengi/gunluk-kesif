@@ -61,8 +61,8 @@ sunucudaki arka plan iş parçacığı yapar.
 ## Günlük kullanım
 
 - Ana sayfa bugünün seçkisini açar. Her başlıkta minimum iki içerik hedeflenir.
-- Güncel hedefi 6 Türkiye/dünya haberi; Spor hedefi 3 gelişme veya branş içeriğidir.
-- Ekonomi, Finans, Teknoloji, Kitap, Yemek ve Moda için hedef ikişer içeriktir.
+- Güncel hedefi 6 Türkiye/dünya haberidir.
+- Diğer konularda hedef üç içeriktir: bir gelişme, bir video, bir derinlemesine yazı (en az iki).
 - Konu ve Yazı/Video filtreleri mevcut günlük listeyi süzer.
 - Yedi günlük takvim ve Geçmiş seçkiler menüsü kayıtlı eski günleri açar.
 - Kayıt bulunmayan takvim günleri pasiftir; geçmiş içerik uydurulmaz.
@@ -83,27 +83,43 @@ ister; kaydedilmiş günler kaynaklara yeniden bağlanmadan açılır.
 
 ## Kaynak kapsamı ve tercihler
 
-Teknoloji ve ekonomi önerileri kullanıcının verdiği örneklerin tarzına göre
-süzülür. Farklı yayıncılar önceliklidir; iki içerik tamamlanamıyorsa aynı yayıncıdan
-farklı bir içerik seçilebilir. Güncel'de yayıncı başına en fazla üç haber alınır.
-Kartlarda seçim gerekçesi görünür.
+Seçim ücretli yapay zekâ kullanmayan, açık kurallarla yapılır
+(`backend/app/services/recommendation_policy.py`, politika sürümü 4):
 
-Güncel teknoloji 30 gün, piyasa yorumları 7 gün ile sınırlıdır. Eski tarih/temel
-konu anlatımları yalnızca içerik düzeyinde gerekçelendirilmişse önerilir.
-Bebar Bilim, Mesele Ekonomi ve Evrim Ağacı örnekleri referans alındı. DataCamp
-örneği erişim engeli nedeniyle bekleyen referans olarak saklandı; aktif öneri değil.
+- **Rol karışımı:** Güncel dışındaki her konuda bir *gelişme* (son bir haftanın
+  önemli haberi/duyurusu), bir *video* ve bir *derinlik* (açıklayan/inceleyen yazı)
+  hedeflenir. Kartta "Yeni gelişme", "İzlemeye değer" veya "Biraz derinleş" yazar.
+- **Kaynak profili:** Her akışın yakın olduğu konular ve 1-3 arası kalite seviyesi
+  vardır (`SOURCE_PROFILES`). Profil konuya ağırlık katar ama tek başına yetmez:
+  içerikte konuya dair bir işaret olmalıdır (kitap sitesindeki konu dışı bir yazı kitap sayılmaz).
+- **Kalite puanı:** kaynak seviyesi + başlıktaki açıklayıcı işaretler ("neden",
+  "nasıl", "rehber", soru biçimi, tarih/kültür) + açıklama uzunluğu; tık tuzağı emojiler
+  ve yayınevi tanıtımı puan düşürür. Yatırım turu duyurusu, anlık altın fiyatı, reklam,
+  canlı yayın, burç yorumu gibi başlıklar hiç önerilmez.
+- **Çeşitlilik:** Farklı yayıncılar önceliklidir; en az iki içerik tamamlanamıyorsa aynı
+  yayıncıdan başka bir içerik seçilebilir. Güncel'de yayıncı başına en fazla üç haber alınır.
 
-Evrim Ağacı RSS ve Mesele Ekonomi Atom akışları farklı yayıncılardan aday sağlar.
-Bebar Bilim için doğrulanan örnek video var; otomatik kanal akışı henüz yok.
-BBC Türkçe, TRT Gündem/Dünya/Spor ve Matematiksel RSS akışları da okunur.
-Lezzet (yemek), ELLE Türkiye (moda), Kitap Haber (kitap) ve Mahfi Eğilmez (ekonomi)
-akışları elle seçilmiş listenin tükenmemesi için eklendi; yazılar yine tek tek süzülür.
-Finans bölümünde piyasa yorumları ve kontrol edilmiş SPK/ING eğitim içerikleri vardır.
-Yemek, moda ve kitapta uygun yeni yazı sayısı akışlara bağlıdır; eksik günler `topic_shortfalls` ile görünür.
+Kurallar 30.09.2026'da toplanan 213 aday elle etiketlenerek ayarlandı. Elle seçilmiş
+içerikler tükendiğinde (ikinci günden itibaren) seçilenlerin iyi olma oranı eski kurallarda
+%67, yeni kurallarda %88; iyi adayların bulunma oranı %32'den %96'ya çıktı.
+Bu ölçüm tek günlük veriye dayanır; farklı günlerde sonuç değişebilir.
 
-Bu bir kurallı ilk sürümdür; örneklerden otomatik öğrenen bir model veya tüm
-interneti tarayan arama motoru değildir. Minimum iki uygun yeni içerik bulunamazsa
-`topic_shortfalls` ile eksik konu gösterilir; tekrar veya uydurma kartla sayı doldurulmaz.
+Tazelik: güncel haber 3 gün, spor haberi 7 gün, gelişme rolü 7 gün, piyasa yorumu 7 gün,
+teknoloji/ekonomi 30 gün, bilim/kitap/yemek 60 gün. Eski temel konu anlatımları yalnızca
+elle incelenmişse önerilir.
+
+Konular: Güncel, Teknoloji, Bilim, Ekonomi, Finans, Kitap, Yemek, Spor. Moda ve giyim
+30.09.2026'da kaldırıldı; geçmiş günlerdeki ve kaydedilmiş eski moda kartları görünmeye devam eder.
+
+Akışlar: Evrim Ağacı (yazı ve YouTube), Matematiksel (bilim); Barış Özcan (teknoloji/bilim);
+Webrazzi (teknoloji);
+Mahfi Eğilmez, Mesele Ekonomi, TRT Haber Ekonomi (ekonomi/finans); Edebiyat Haber,
+Kitap Haber (kitap); Lezzet, Yemek.com YouTube (yemek);
+Socrates Dergi, TRT Spor YouTube, TRT Haber Spor (spor); BBC Türkçe, TRT Gündem/Dünya
+(güncel). DW Türkçe ve ShiftDelete denendi; ölçümde uygun içerik çıkmadığı için eklenmedi.
+
+Minimum iki uygun yeni içerik bulunamazsa `topic_shortfalls` ile eksik konu gösterilir;
+tekrar veya uydurma kartla sayı doldurulmaz.
 [Tercihler ve sınırlamalar](docs/selection-preferences.md).
 
 Bugünün eski politikayla üretilmiş seçkisi sunucuyu yeniden başlatınca ilk erişimde
@@ -151,7 +167,8 @@ projenin içinde sunulur. [Arayüzün dosya düzeni ve davranışı](docs/fronte
 
 ## Konu kapsamı
 
-Ekonomi; enflasyon, büyüme, istihdam ve ekonomik tarih. Finans; bütçe, birikim,
+Teknoloji; yapay zekâ, yazılım, donanım ve teknolojinin gündelik hayata etkisi.
+Bilim; doğa bilimleri, uzay, matematik, iklim ve bilimsel keşifler. Ekonomi; enflasyon, büyüme, istihdam ve ekonomik tarih. Finans; bütçe, birikim,
 piyasalar ve yatırım araçlarının temel kavramları. Spor; spor dünyasındaki
 gelişmeler, branş kuralları/teknikleri ve spor kültürüdür. Dünya haberleri şu an
 Türkçe okunabilen BBC Türkçe ve TRT Dünya'dan gelir; Guardian'ın İngilizce akışı

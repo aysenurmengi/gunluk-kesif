@@ -1,9 +1,11 @@
-import { topics } from "../data/topics.js?v=accounts-1";
+import { activeTopics } from "../data/topics.js?v=accounts-1";
 import { toCardItem } from "./api.js?v=accounts-1";
 const TOPICS_KEY = "gk-v2-topics";
 // Hesaplardan önce kayıtlar tarayıcıda tutuluyordu; ilk girişte hesaba aktarılır.
 const LEGACY_SAVED_KEY = "gk-v2-saved";
-const allTopics = topics.map((topic) => topic.id);
+const allTopics = activeTopics.map((topic) => topic.id);
+// Sonradan eklenen konular: önceden bütün konuları seçmiş kullanıcıda otomatik seçilir.
+const ADDED_TOPICS = ["finans", "bilim"];
 
 // localStorage erişimi engellense bile uygulama bellekte çalışmaya devam eder.
 export function readPreferences(storage) {
@@ -17,8 +19,10 @@ export function readPreferences(storage) {
       const ids = JSON.parse(rawTopics);
       if (!Array.isArray(ids)) throw new Error("Geçersiz tercihler");
       selectedTopics = new Set(ids.map((id) => id === "yapay-zeka" ? "teknoloji" : id).filter((id) => allTopics.includes(id)));
-      // Önceden bütün konuları seçen kullanıcı yeni Finans konusunu da görür.
-      if (allTopics.filter((id) => id !== "finans").every((id) => selectedTopics.has(id))) selectedTopics.add("finans");
+      // Önceden bütün konuları seçen kullanıcı yeni eklenen konuları da görür.
+      if (allTopics.filter((id) => !ADDED_TOPICS.includes(id)).every((id) => selectedTopics.has(id))) {
+        for (const id of ADDED_TOPICS) selectedTopics.add(id);
+      }
     }
   } catch { warning = true; }
   try {

@@ -34,3 +34,17 @@ class ContentItem:
     publication_date_only: bool = False
     language: str = "tr"
     news_scope: str = ""
+    # Konu içindeki yeri: gelisme (yeni gelişme), video, derinlik (açıklayıcı yazı).
+    role: str = ""
+    # Kural tabanlı kalite puanı (yaklaşık 0-12); aynı konudaki adayları sıralar.
+    quality: int = 0
+
+
+@dataclass(frozen=True)
+class SourceProfile:
+    """Bir akışın hangi konulara yakın olduğu ve genel kalite seviyesi (1-3).
+
+    Konu yine içerik düzeyinde belirlenir; profil yalnızca ağırlık katar.
+    """
+    topics: tuple[str, ...] = ()
+    tier: int = 2

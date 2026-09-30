@@ -5,6 +5,8 @@ const dateFormatter = new Intl.DateTimeFormat("tr-TR", {
 });
 
 class InvalidContentError extends Error {}
+// Konu içindeki yeri: her başlıkta bir gelişme, bir video, bir derinlemesine yazı hedeflenir.
+const ROLE_LABELS = { gelisme: "Yeni gelişme", video: "İzlemeye değer", derinlik: "Biraz derinleş" };
 
 // Backend verisini mevcut kart tasarımının kullandığı alanlara dönüştür.
 export function toCardItem(item) {
@@ -26,9 +28,11 @@ export function toCardItem(item) {
     original: item,
     id: item.url, url: item.url, title: item.title, topic,
     format: item.content_type === "video" ? "Video" : "Yazı",
-    purpose: item.content_type === "news"
-      ? (item.topic === "spor" ? "Spor gündemi" : item.news_scope === "turkiye" ? "Türkiye gündemi" : item.news_scope === "dunya" ? "Dünya gündemi" : "Gündemi yakala")
-      : item.purpose === "evergreen" ? "Biraz derinleş" : "Gündemi yakala",
+    purpose: item.topic === "guncel"
+      ? (item.news_scope === "turkiye" ? "Türkiye gündemi" : item.news_scope === "dunya" ? "Dünya gündemi" : "Gündemi yakala")
+      : item.topic === "spor" && item.content_type === "news" ? "Spor gündemi"
+      : ROLE_LABELS[item.role]
+        ?? (item.content_type === "news" ? "Yeni gelişme" : item.purpose === "evergreen" ? "Biraz derinleş" : "Gündemi yakala"),
     sourceName: item.source_name,
     recommendationReason: item.recommendation_reason || "",
     publishedAt: validDate ? date.toISOString() : null,
