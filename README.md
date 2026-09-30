@@ -1,3 +1,6 @@
+
+Projeyi ziyaret etmek için; https://gunluk-kesif.vercel.app/
+
 # Günlük Keşif
 
 Türkçe makale, blog ve videoları öne çıkaran günlük içerik seçkisi.
