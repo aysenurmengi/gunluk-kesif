@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from .api import client
+from .api.cron_routes import router as cron_router
 from .api.daily_routes import router as daily_router
 from .api.account_routes import router as account_router
 
@@ -35,13 +37,16 @@ async def security(request, call_next):
     origin = request.headers.get("origin")
     if request.method in UNSAFE_METHODS and path.startswith("/api/") and (
         request.headers.get("sec-fetch-site") == "cross-site"
-        or (origin and origin != f"{request.url.scheme}://{request.headers.get('host', '')}")
+        or (origin and origin != client.origin(request))
     ):
         return JSONResponse({"detail": {"message": "Bu istek başka bir siteden geldiği için reddedildi."}}, 403)
     response = await call_next(request)
     if path in {"/", "/index.html"} or path.startswith(("/js/", "/css/")):
         response.headers["Cache-Control"] = "no-cache"
     response.headers.update(SECURITY_HEADERS)
+    if client.scheme(request) == "https":
+        # Tarayıcı bu siteye bir yıl boyunca yalnızca HTTPS ile bağlansın.
+        response.headers["Strict-Transport-Security"] = "max-age=31536000"
     # /docs sayfası FastAPI'nin CDN'den yüklediği dosyaları kullanır.
     if not path.startswith(("/docs", "/redoc")):
         response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
@@ -49,6 +54,7 @@ async def security(request, call_next):
 
 
 app.include_router(daily_router)
+app.include_router(cron_router)
 app.include_router(account_router)
 # Statik frontend en son eklenir; /api ve /docs yollarını gölgelemez.
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

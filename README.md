@@ -37,6 +37,24 @@ CREATE DATABASE gunluk_kesif_test OWNER gunluk_kesif; -- isteğe bağlı, testle
 arşivini taşımak için sunucu kapalıyken `python -m backend.app.migrate` çalıştır
 (SQLite dosyasına yazmaz, tekrar çalıştırılabilir). `.env` ve `data/` git'e girmez.
 
+## Vercel'de yayınlama
+
+`vercel.json` ve `pyproject.toml` hazırdır; Vercel FastAPI uygulamasını
+`backend.app.main:app` üzerinden tek bir fonksiyon olarak çalıştırır (bölge: Frankfurt).
+
+1. Vercel'de **Add New → Project** ile GitHub deposunu içe aktar ve dağıt.
+2. Projede **Storage → Create Database → Neon (Postgres)** seç, bölgeyi
+   Frankfurt (`aws-eu-central-1`) yap ve projeye bağla. `DATABASE_URL` otomatik eklenir.
+3. **Settings → Environment Variables** altında en az 16 karakterlik rastgele bir
+   `CRON_SECRET` ekle, sonra **Deployments → Redeploy** yap.
+
+Tablolar ilk istekte oluşur. Vercel'in dosya sistemi kalıcı olmadığından orada
+SQLite kullanılmaz; `DATABASE_URL` yoksa uygulama açık bir hatayla durur.
+Zamanlanmış görevler (`/api/cron/daily`) Türkiye saatiyle yaklaşık 00:10'da yeni
+günün seçkisini hazırlar; 08:10, 14:10 ve 19:10'da eksik konuları tamamlamayı dener
+(ücretsiz planda saat içinde herhangi bir dakikada çalışabilir). Yerelde bu işi
+sunucudaki arka plan iş parçacığı yapar.
+
 ## Günlük kullanım
 
 - Ana sayfa bugünün seçkisini açar. Her başlıkta minimum iki içerik hedeflenir.

@@ -1,0 +1,16 @@
+[project]
+name = "gunluk-kesif"
+version = "0.1.0"
+description = "Türkçe günlük içerik seçkisi"
+requires-python = ">=3.13"
+# Vercel bağımlılıkları buradan kurar. Yerel kurulum backend/requirements.txt
+# dosyasını kullanır; iki liste aynı tutulmalı (test_deploy.py kontrol eder).
+dependencies = [
+    "fastapi==0.142.0",
+    "pydantic==2.13.5",
+    "uvicorn==0.54.0",
+    "psycopg[binary]==3.3.6",
+]
+
+[tool.vercel]
+entrypoint = "backend.app.main:app"

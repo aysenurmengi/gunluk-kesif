@@ -17,3 +17,8 @@ def load_env(path=PROJECT_ROOT / ".env"):
             continue
         key, value = line.split("=", 1)
         os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+def running_on_vercel():
+    """Vercel her fonksiyonda VERCEL=1 tanımlar; yerelde tanımlı değildir."""
+    return bool(os.environ.get("VERCEL"))

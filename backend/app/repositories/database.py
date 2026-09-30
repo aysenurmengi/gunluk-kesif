@@ -11,11 +11,12 @@ import threading
 from contextlib import contextmanager
 from pathlib import Path
 
-from ..config import PROJECT_ROOT, load_env
+from ..config import PROJECT_ROOT, load_env, running_on_vercel
 
 load_env()
 DB_PATH = PROJECT_ROOT / "data" / "discovery.sqlite3"
-DATABASE = os.environ.get("DATABASE_URL") or DB_PATH
+# Vercel'in Neon entegrasyonu DATABASE_URL, eski Vercel Postgres ise POSTGRES_URL tanımlar.
+DATABASE = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL") or DB_PATH
 SCHEMA_LOCK_ID = 7_302_027
 
 SQLITE_SCHEMA = """
@@ -117,7 +118,9 @@ def connect(target=None):
     target = DATABASE if target is None else target
     if is_postgres(target):
         import psycopg
-        connection = psycopg.connect(target, connect_timeout=10)
+        # prepare_threshold=None: bağlantı havuzlayıcı (PgBouncer/Neon pooler) arkasında
+        # sunucu tarafı hazır sorgular başka istemcinin bağlantısına düşebilir.
+        connection = psycopg.connect(target, connect_timeout=10, prepare_threshold=None)
         db = Database(connection, postgres=True)
         try:
             _ensure_postgres_schema(target, db)
@@ -125,6 +128,9 @@ def connect(target=None):
             connection.close()
             raise
     else:
+        if running_on_vercel():
+            # Vercel'in dosya sistemi kalıcı değildir; SQLite'a yazılanlar kaybolur.
+            raise RuntimeError("Vercel'de DATABASE_URL (PostgreSQL) ortam değişkeni tanımlı olmalı.")
         Path(target).parent.mkdir(parents=True, exist_ok=True)
         connection = sqlite3.connect(target, timeout=30)
         db = Database(connection, postgres=False)

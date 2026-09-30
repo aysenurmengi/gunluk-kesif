@@ -3,6 +3,7 @@ from dataclasses import asdict, fields
 from datetime import datetime, timezone, timedelta
 import logging
 import threading
+from ..config import running_on_vercel
 from ..models import ContentItem
 from ..repositories import daily as repository, database
 from ..sources.daily_catalog import FEED_SOURCES, CURATED_SOURCES, SUPPORTED_TOPICS, CATALOG_REVISION, curated_items
@@ -59,7 +60,8 @@ def get_daily(day, db_path=None, wait_for_refresh=True):
     """Kayıtlı seçkiyi döndür; bugün için gerekirse kaynakları okuyup oluştur.
 
     Eksik konulu seçki 15 dakika sonra yeniden tamamlanır. wait_for_refresh=False
-    ise kullanıcı mevcut kartları hemen görür, tamamlama arka planda yapılır."""
+    ise kullanıcı mevcut kartları hemen görür, tamamlama arka planda yapılır.
+    Vercel'de yanıt sonrası iş parçacığı durdurulur; orada tamamlamayı cron yapar."""
     target = database.DATABASE if db_path is None else db_path
     with repository.connect(target) as db:
         existing = repository.read_edition(db, day.isoformat())
@@ -69,7 +71,8 @@ def get_daily(day, db_path=None, wait_for_refresh=True):
     if state == "fresh":
         return existing
     if state == "stale" and not wait_for_refresh:
-        refresh_in_background(day, target)
+        if not running_on_vercel():
+            refresh_in_background(day, target)
         return existing
     return build_edition(day, target)
 

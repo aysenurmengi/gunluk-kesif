@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from ..services import auth
+from . import client
 
 router = APIRouter(prefix="/api", tags=["Hesap ve kaydedilenler"])
 
@@ -27,7 +28,7 @@ def _error(error: auth.AuthError):
 def _set_session(request: Request, response: Response, token: str):
     response.set_cookie(
         auth.SESSION_COOKIE, token, max_age=int(auth.SESSION_LIFETIME.total_seconds()),
-        httponly=True, samesite="lax", secure=request.url.scheme == "https", path="/")
+        httponly=True, samesite="lax", secure=client.scheme(request) == "https", path="/")
 
 
 def _no_store(response: Response):
@@ -46,8 +47,7 @@ def current_user(request: Request, response: Response):
 @router.post("/auth/register", status_code=201)
 def register(credentials: Credentials, request: Request, response: Response):
     try:
-        client = request.client.host if request.client else ""
-        user, token = auth.register(credentials.email, credentials.password, client)
+        user, token = auth.register(credentials.email, credentials.password, client.ip(request))
     except auth.AuthError as error:
         raise _error(error) from error
     _set_session(request, response, token)
@@ -57,9 +57,8 @@ def register(credentials: Credentials, request: Request, response: Response):
 
 @router.post("/auth/login")
 def login(credentials: Credentials, request: Request, response: Response):
-    client = request.client.host if request.client else ""
     try:
-        user, token = auth.login(credentials.email, credentials.password, client)
+        user, token = auth.login(credentials.email, credentials.password, client.ip(request))
     except auth.AuthError as error:
         raise _error(error) from error
     _set_session(request, response, token)
